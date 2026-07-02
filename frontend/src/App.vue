@@ -272,7 +272,7 @@ interface ApiResponse {
   page_size: number
 }
 
-const API_URL = '/api/v1/contracts/hot'
+const API_URL = 'http://localhost:8082/api/v1/contracts/hot'
 
 const rawData = ref<HotContract[]>([])
 const lastUpdated = ref('')

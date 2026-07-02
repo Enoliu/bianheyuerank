@@ -6,9 +6,6 @@ backend/dist/
 frontend/node_modules/
 frontend/dist/
 
-# Worker
-worker/node_modules/
-
 # IDE
 .cursor/
 .vscode/
@@ -16,7 +13,3 @@ worker/node_modules/
 # OS
 .DS_Store
 Thumbs.db
-
-# Build artifacts
-server.exe
-server.exe~
