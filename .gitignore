@@ -1,9 +1,13 @@
 # Backend
 backend/server.exe
+backend/dist/
 
 # Frontend
 frontend/node_modules/
 frontend/dist/
+
+# Worker
+worker/node_modules/
 
 # IDE
 .cursor/
@@ -12,3 +16,7 @@ frontend/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+# Build artifacts
+server.exe
+server.exe~

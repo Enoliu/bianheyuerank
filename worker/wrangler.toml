@@ -1,0 +1,6 @@
+name = "hot-contracts-api"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[env]
+WORKERS_DEV = true

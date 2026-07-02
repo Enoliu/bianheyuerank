@@ -272,7 +272,7 @@ interface ApiResponse {
   page_size: number
 }
 
-const API_URL = 'http://localhost:8082/api/v1/contracts/hot'
+const API_URL = '/api/v1/contracts/hot'
 
 const rawData = ref<HotContract[]>([])
 const lastUpdated = ref('')
@@ -295,13 +295,14 @@ const fetchData = async (page: number = 1, append: boolean = false) => {
   isLoading.value = true
 
   try {
-    const url = new URL(API_URL)
-    url.searchParams.append('sort_by', sortState.value.prop || 'volume24hUsd')
-    url.searchParams.append('order', sortState.value.order || 'descending')
-    url.searchParams.append('page', page.toString())
-    url.searchParams.append('page_size', pageSize.toString())
+    const params = new URLSearchParams({
+      sort_by: sortState.value.prop || 'volume24hUsd',
+      order: sortState.value.order || 'descending',
+      page: page.toString(),
+      page_size: pageSize.toString(),
+    })
 
-    const response = await fetch(url.toString())
+    const response = await fetch(`${API_URL}?${params}`)
     if (!response.ok) {
       console.error("Fetch error:", response.statusText)
       return
