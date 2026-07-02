@@ -1,8 +1,12 @@
 package main
 
 import (
+	"embed"
+	"flag"
+	"io/fs"
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -13,10 +17,22 @@ import (
 	"github.com/patrickmn/go-cache"
 )
 
+//go:embed all:dist
+var frontendFS embed.FS
+
 var dataCache = cache.New(60*time.Second, 2*time.Minute)
 var binanceSvc = service.NewBinanceService()
 
 func main() {
+	port := flag.String("port", "8082", "server port")
+	flag.Parse()
+
+	// 环境变量优先于命令行参数
+	if envPort := os.Getenv("PORT"); envPort != "" {
+		*port = envPort
+	}
+
+	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
 	r.Use(func(c *gin.Context) {
@@ -32,9 +48,61 @@ func main() {
 
 	r.GET("/api/v1/contracts/hot", getHotContractsHandler)
 
-	log.Println("Server starting on :8082...")
-	if err := r.Run(":8082"); err != nil {
+	distFS, _ := fs.Sub(frontendFS, "dist")
+	r.NoRoute(func(c *gin.Context) {
+		p := c.Request.URL.Path[1:]
+		if p == "" {
+			p = "index.html"
+		}
+		f, err := distFS.(fs.ReadFileFS).ReadFile(p)
+		if err != nil {
+			f, _ = distFS.(fs.ReadFileFS).ReadFile("index.html")
+		}
+		ct := mimeByExt(p)
+		c.Data(http.StatusOK, ct, f)
+	})
+
+	log.Printf("Server starting on :%s", *port)
+	log.Printf("Open http://localhost:%s in browser", *port)
+	if err := r.Run(":" + *port); err != nil {
 		log.Fatalf("Server run failed: %v", err)
+	}
+}
+
+func mimeByExt(p string) string {
+	ext := ""
+	if i := len(p) - 1; i >= 0 {
+		for j := i; j >= 0; j-- {
+			if p[j] == '.' {
+				ext = p[j:]
+				break
+			}
+			if p[j] == '/' {
+				break
+			}
+		}
+	}
+	switch ext {
+	case ".css":
+		return "text/css; charset=utf-8"
+	case ".svg":
+		return "image/svg+xml"
+	case ".html", ".htm":
+		return "text/html; charset=utf-8"
+	case ".js":
+		return "application/javascript; charset=utf-8"
+	case ".json":
+		return "application/json"
+	case ".png":
+		return "image/png"
+	case ".jpg", ".jpeg":
+		return "image/jpeg"
+	case ".ico":
+		return "image/x-icon"
+	case ".woff", ".woff2":
+		return "font/woff"
+	default:
+		return "text/html; charset=utf-8"
 	}
 }
 
