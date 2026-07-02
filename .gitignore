@@ -1,0 +1,14 @@
+# Backend
+backend/server.exe
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# IDE
+.cursor/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
